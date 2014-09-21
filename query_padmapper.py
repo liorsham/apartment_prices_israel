@@ -5,10 +5,10 @@ import json
 import time
 
 # boston
-MIN_LAT=42.255594
-MAX_LAT=42.4351936
-MIN_LON=-71.1828231
-MAX_LON=-70.975800
+#MIN_LAT=42.255594
+#MAX_LAT=42.4351936
+#MIN_LON=-71.1828231
+#MAX_LON=-70.975800
 
 # baltimore
 #MAX_LAT=39.388979
@@ -28,16 +28,22 @@ MAX_LON=-70.975800
 #MAX_LAT=37.83
 #MIN_LON=-122.70
 
-MAX_RENT=6050
+# tel aviv
+#https://www.google.co.il/maps/@32.0756686,34.7984026,14z
+LAT=32.0756686
+LON=34.7984026
+ZOOM=14
+
+MAX_RENT=20000
 
 DEFAULTS = {
     'cities': 'false',
     'showPOI': 'false',
     'limit': 2000,
     'minRent': 0,
-    'maxRent': 6000,
+    'maxRent': MAX_RENT,
     'searchTerms': '',
-    'maxPricePerBedroom': 6000,
+    'maxPricePerBedroom': MAX_RENT,
     'minBR': 0,
     'maxBR': 10,
     'minBA': 1,
@@ -54,7 +60,7 @@ DEFAULTS = {
     'cl': 'true',
     'apts': 'true',
     'ood': 'true',
-    'zoom': 15,
+    'zoom': ZOOM,
     'favsOnly': 'false',
     'onlyHQ': 'true',
     'showHidden': 'false',
@@ -64,10 +70,9 @@ DEFAULTS = {
     }
 
 def query(kwargs):
-    assert 'eastLong' in kwargs
-    assert 'northLat' in kwargs
-    assert 'westLong' in kwargs
-    assert 'southLat' in kwargs
+    assert 'Long' in kwargs
+    assert 'Lat' in kwargs
+
 
     url='https://www.padmapper.com/reloadMarkersJSON.php'
 
@@ -94,10 +99,9 @@ def query(kwargs):
 
 def start():
     kwargs = dict((k,v) for (k,v) in DEFAULTS.items())
-    kwargs['southLat']=MIN_LAT
-    kwargs['westLong']=MIN_LON
-    kwargs['northLat']=MAX_LAT
-    kwargs['eastLong']=MAX_LON
+    kwargs['Lat']=LAT
+    kwargs['Long']=LON
+
 
     seen_ids = set()
 

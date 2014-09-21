@@ -1,4 +1,4 @@
-import image
+from PIL import Image
 import sys
 import math
 

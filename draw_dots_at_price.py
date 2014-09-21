@@ -1,4 +1,4 @@
-import Image
+from PIL import Image
 import sys
 import math
 
@@ -27,8 +27,7 @@ def pixel_to_ll(x,y):
     calc_x, calc_y = ll_to_pixel(lat, lon)
 
     if abs(calc_x-x) > 1 or abs(calc_y-y) > 1:
-        print "Mismatch: %s, %s => %s %s" % (
-            x,y, calc_x, calc_y)
+        print("Mismatch: %s, %s => %s %s" % (x,y, calc_x, calc_y))
 
     return lat, lon
 
