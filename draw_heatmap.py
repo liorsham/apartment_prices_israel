@@ -3,7 +3,12 @@ import sys
 import math
 
 # set boundaries in query_padmapper
-from query_padmapper import MAX_LAT, MAX_LON, MIN_LAT, MIN_LON
+from query_padmapper import LAT, LON, ZOOM
+
+MIN_LAT=42.255594
+MAX_LAT=42.4351936
+MIN_LON=-71.1828231
+MAX_LON=-70.975800
 
 # change these to change how detailed the generated image is
 # (1000x1000 is good, but very slow)

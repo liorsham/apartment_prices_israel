@@ -1,14 +1,14 @@
 import time
 import sys
-import urllib
+import urllib.request
 import json
 import time
 
 # boston
-#MIN_LAT=42.255594
-#MAX_LAT=42.4351936
-#MIN_LON=-71.1828231
-#MAX_LON=-70.975800
+MIN_LAT=42.255594
+MAX_LAT=42.4351936
+MIN_LON=-71.1828231
+MAX_LON=-70.975800
 
 # baltimore
 #MAX_LAT=39.388979
@@ -30,9 +30,9 @@ import time
 
 # tel aviv
 #https://www.google.co.il/maps/@32.0756686,34.7984026,14z
-LAT=32.0756686
-LON=34.7984026
-ZOOM=14
+#LAT=32.0756686
+#LON=34.7984026
+#ZOOM=14
 
 MAX_RENT=20000
 
@@ -60,7 +60,7 @@ DEFAULTS = {
     'cl': 'true',
     'apts': 'true',
     'ood': 'true',
-    'zoom': ZOOM,
+    'zoom': '15',
     'favsOnly': 'false',
     'onlyHQ': 'true',
     'showHidden': 'false',
@@ -70,9 +70,10 @@ DEFAULTS = {
     }
 
 def query(kwargs):
-    assert 'Long' in kwargs
-    assert 'Lat' in kwargs
-
+    assert 'eastLong' in kwargs
+    assert 'northLat' in kwargs
+    assert 'westLong' in kwargs
+    assert 'southLat' in kwargs
 
     url='https://www.padmapper.com/reloadMarkersJSON.php'
 
@@ -82,9 +83,10 @@ def query(kwargs):
 
     txt = ""
     try:
-        txt = urllib.urlopen(full_url).read()
-        j = json.loads(txt)
-    except Exception(e):
+        txt = urllib.request.urlopen(full_url).read()
+        ur = txt.decode('utf8')
+        j = json.loads(ur)
+    except Exception as e:
         print(e)
         print(txt)
         print("ERROR", full_url)
@@ -99,30 +101,31 @@ def query(kwargs):
 
 def start():
     kwargs = dict((k,v) for (k,v) in DEFAULTS.items())
-    kwargs['Lat']=LAT
-    kwargs['Long']=LON
-
+    kwargs['southLat']=MIN_LAT
+    kwargs['westLong']=MIN_LON
+    kwargs['northLat']=MAX_LAT
+    kwargs['eastLong']=MAX_LON
 
     seen_ids = set()
 
     epoch_timestamp = int(time.mktime(time.gmtime()))
     with open("apts-%s.txt" % epoch_timestamp, 'w') as outf:
-        for rent in range(100,MAX_RENT,25):
+        for rent in range(1000,MAX_RENT,500):
             print("querying from $%s ..." % rent)
             for bedrooms in range(10):
-                kwargs['minRent'] = rent-25
+                kwargs['minRent'] = rent-500
                 kwargs['maxRent'] = rent
-                kwargs['minBR'] = bedrooms
-                kwargs['maxBR'] = bedrooms
+                kwargs['minBR'] = 0
+                kwargs['maxBR'] = 10
 
                 for apt_id, lon, lat in query(kwargs):
-                    if apt_id not in seen_ids:
+                     if apt_id not in seen_ids:
                         outf.write("%s %s %s %s %s\n" % (
-                                rent, bedrooms, apt_id, lon, lat))
+                              rent, bedrooms, apt_id, lon, lat))
                         sys.stdout.flush()
                         seen_ids.add(apt_id)
 
-                time.sleep(2)
+            time.sleep(2)
 
 
 if __name__=="__main__":
@@ -131,7 +134,7 @@ The guy who wrote Padmapper says this tool puts a pretty heavy load on his serve
 would rather it was run no more than once a month.  If you're just looking for some
 apartment data, I've put some in apts-2013-01-29, which is for Boston in January 2013.
 """
-    # start(*sys.argv[1:])
+     start()
 
      """
 Ones labeled $6000 in the output file are really $6000+.  You can fix them manually
