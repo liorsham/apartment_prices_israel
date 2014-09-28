@@ -30,19 +30,32 @@ MAX_LON=-70.975800
 
 # tel aviv
 #https://www.google.co.il/maps/@32.0756686,34.7984026,14z
+MIN_LAT=31.975742453595963  #southLat
+MAX_LAT=32.16688183134553  #northLat
+MIN_LON=34.523274442382785  #westLong
+MAX_LON=35.017659208007785 #eastLong
 #LAT=32.0756686
 #LON=34.7984026
 #ZOOM=14
+#from site:
+# http://www.padmapper.com/reloadMarkersJSON.php?eastLong=35.017659208007785&northLat=32.16688183134553&westLong=34.523274442382785&southLat=31.975742453595963&cities=false&showPOI=false&limit=1575&minRent=0&maxRent=6000&searchTerms=Words+Required+In+Listing&maxPricePerBedroom=6000&minBR=0&maxBR=10&minBA=1&maxAge=7&imagesOnly=false&phoneReq=false&cats=false&dogs=false&noFee=false&showSubs=true&showNonSubs=true&showRooms=true&showVac=true&userId=-1&cl=true&pl=true&aptsrch=true&rnt=true&airbnb=true&ood=true&af=true&rltr=true&zoom=14&favsOnly=false&onlyHQ=true&showHidden=false&am=false&workplaceLat=0&workplaceLong=0&maxTime=0
+#
 
-MAX_RENT=20000
+#from script:
+# https://www.padmapper.com/reloadMarkersJSON.php?
+#&eastLong=35.017659208007785&northLat=32.16688183134553&westLong=34.523274442382785&southLat=31.975742453595963
+#&cities=false&showPOI=false&limit=2000&maxRent=20000&minRent=0&searchTerms=&maxPricePerBedroom=20000&minBR=0&maxBR=10&minBA=1&maxAge=7&imagesOnly=false&phoneReq=false&cats=false&dogs=false&noFee=false&showSubs=true&showNonSubs=true&showRooms=true&userId=-1&cl=true&
+# &showHidden=false&maxTime=0&workplaceLong=0&ood=true&apts=true&workplaceLat=0&onlyHQ=true&zoom=15&favsOnly=false
+
+MAX_RENT=10000
 
 DEFAULTS = {
     'cities': 'false',
     'showPOI': 'false',
-    'limit': 2000,
+    'limit': 2000,  #1575
     'minRent': 0,
     'maxRent': MAX_RENT,
-    'searchTerms': '',
+    'searchTerms': '',                  #Words+Required+In+Listing
     'maxPricePerBedroom': MAX_RENT,
     'minBR': 0,
     'maxBR': 10,
@@ -55,15 +68,23 @@ DEFAULTS = {
     'noFee': 'false',
     'showSubs': 'true',
     'showNonSubs': 'true',
+    'showVac': 'true',            #was missing
     'showRooms': 'true',
     'userId': -1,
     'cl': 'true',
+    'pl': 'true',                   #was missing
+    'aptsrch': 'true',        #was missing
+    'rnt': 'true',             #was missing
+    'airbnb': 'true',       #was missing
+    'af': 'true',      #was missing
+    'rltr': 'true',      #was missing
+    'am': 'false',     #was missing
     'apts': 'true',
     'ood': 'true',
-    'zoom': '15',
+    'zoom': '14',
     'favsOnly': 'false',
-    'onlyHQ': 'true',
-    'showHidden': 'false',
+    'onlyHQ': 'true',           #what is it? maybe set to false?
+    'showHidden': 'false',      #what is it? maybe set to true?
     'workplaceLat': 0,
     'workplaceLong': 0,
     'maxTime': 0
@@ -110,13 +131,13 @@ def start():
 
     epoch_timestamp = int(time.mktime(time.gmtime()))
     with open("apts-%s.txt" % epoch_timestamp, 'w') as outf:
-        for rent in range(1000,MAX_RENT,500):
-            print("querying from $%s ..." % rent)
+        for rent in range(1000,MAX_RENT,100):
+            print("querying from %s ..." % rent)
             for bedrooms in range(10):
-                kwargs['minRent'] = rent-500
+                kwargs['minRent'] = rent-100
                 kwargs['maxRent'] = rent
-                kwargs['minBR'] = 0
-                kwargs['maxBR'] = 10
+                kwargs['minBR'] = bedrooms
+                kwargs['maxBR'] = bedrooms
 
                 for apt_id, lon, lat in query(kwargs):
                      if apt_id not in seen_ids:
@@ -125,7 +146,7 @@ def start():
                         sys.stdout.flush()
                         seen_ids.add(apt_id)
 
-            time.sleep(2)
+            time.sleep(1)
 
 
 if __name__=="__main__":

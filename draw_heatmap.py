@@ -3,17 +3,17 @@ import sys
 import math
 
 # set boundaries in query_padmapper
-from query_padmapper import LAT, LON, ZOOM
+#from query_padmapper import LAT, LON, ZOOM
 
-MIN_LAT=42.255594
-MAX_LAT=42.4351936
-MIN_LON=-71.1828231
-MAX_LON=-70.975800
+MIN_LAT=31.975742453595963  #southLat
+MAX_LAT=32.16688183134553  #northLat
+MIN_LON=34.523274442382785  #westLong
+MAX_LON=35.017659208007785 #eastLong
 
 # change these to change how detailed the generated image is
 # (1000x1000 is good, but very slow)
-MAX_X=100
-MAX_Y=100
+MAX_X=500
+MAX_Y=500
 
 # at what distance should we stop making predictions?
 IGNORE_DIST=0.01
@@ -215,16 +215,18 @@ def start(fname, price_per_X):
     I.save(fname + "." + price_per_X + "." + str(MAX_X) + ".png", "PNG")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 3 or len(sys.argv) < 2:
-        print ("usage: python draw_heatmap.py apts.txt [room|bedroom]")
-        print ("   room: price is $ per estimated rooms, which is bedrooms + 1")
-        print ("   bedroom: price is $ per bedroom, with singles counting as one bedroom")
-        print (" default is 'room' as this better reflects the underlying variable of")
-        print (" price per square foot")
-    else:
-        fname = sys.argv[1]
-        if len(sys.argv) > 2:
-            price_per_X = sys.argv[2]
-        else:
-            price_per_X = "room"
-        start(fname, price_per_X)
+    start("apts.txt", "room")
+    #
+    #if len(sys.argv) > 3 or len(sys.argv) < 2:
+    #    print ("usage: python draw_heatmap.py apts.txt [room|bedroom]")
+    #    print ("   room: price is $ per estimated rooms, which is bedrooms + 1")
+    #    print ("   bedroom: price is $ per bedroom, with singles counting as one bedroom")
+    #    print (" default is 'room' as this better reflects the underlying variable of")
+    #    print (" price per square foot")
+    #else:
+    #    fname = sys.argv[1]
+    #    if len(sys.argv) > 2:
+    #        price_per_X = sys.argv[2]
+    #    else:
+    #        price_per_X = "room"
+    #    start(fname, price_per_X)
