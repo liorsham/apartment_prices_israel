@@ -12,8 +12,8 @@ MAX_LON=35.017659208007785 #eastLong
 
 # change these to change how detailed the generated image is
 # (1000x1000 is good, but very slow)
-MAX_X=500
-MAX_Y=500
+MAX_X=1000
+MAX_Y=1000
 
 # at what distance should we stop making predictions?
 IGNORE_DIST=0.01
@@ -125,8 +125,8 @@ def color(val, price_per_room=False):
         prices = [1600, 1500, 1400, 1300, 1200, 1100, 1000, 900,
                   800, 700, 600, 500, 400, 300, 250, 200]
     else:
-        prices = [1800, 1700, 1600, 1500, 1400, 1300, 1200, 1100,
-                  1000, 900, 800, 700, 600, 500, 400, 300]
+        prices = [4000, 3750, 3500, 3250, 3000, 2750, 2500, 2250, 2000, 1750,
+                  1500, 1250, 1000, 750, 500]
 
     colors = [(255, 0, 0), # red
               (255, 43, 0), # redorange

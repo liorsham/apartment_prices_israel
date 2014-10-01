@@ -1,0 +1,283 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Tel Aviv Apartment Prices</title>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+  html { height: 100% }
+  body { height: 100%; margin: 0px; padding: 0px }
+  #map_canvas { height: 100% }
+  #legend {
+    position: absolute;
+    bottom: 30px;
+    right: 20px;
+    background: white;
+    border-style: solid;
+    border-width: 1px;
+    padding: 4px;
+  }
+  td {
+    line-height: 100%;
+  }
+</style>
+
+<!-- begin list of date files -->
+<script type="text/javascript">
+var dates_available = [
+  "2011-06-16",
+  "2013-01-29",
+  "2013-02-18",
+  "2013-03-18",
+  "2013-04-18",
+  "2013-05-18",
+  "2013-06-18",
+  "2013-07-18",
+  "2013-08-18",
+  "2013-10-18",
+  "2013-12-18",
+  "2014-03-18",
+  "2014-04-18",
+  "2014-05-18",
+  "2014-06-18",
+  "2014-07-18",
+  "2014-08-18",
+  "2014-09-18",
+]
+</script>
+<!-- end list of date files -->
+
+<script type="text/javascript"
+    src="http://maps.google.com/maps/api/js?sensor=false">
+</script>
+<script type="text/javascript">
+  var overlay = null;
+  var map;
+  var current_date_index;
+  var current_room_style = "room";
+
+  TQOverlay.prototype = new google.maps.OverlayView();
+
+  function initialize() {
+    var latlng = new google.maps.LatLng(32.0756686, 34.7984026);
+    var myOptions = {
+      zoom: 14,
+      center: latlng,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+    var date_selected = false;
+    if (window.location.hash.length > 5) {
+      var fragment = window.location.hash.split('#')[1]
+      var date = fragment
+      var room_style = "room";
+      if (fragment.split("&").length == 2) {
+        date = fragment.split("&")[0];
+        current_room_style = fragment.split("&")[1] == "room" ? "room" : "bedroom";
+      }
+      for (var i = 0 ; i < dates_available.length && !date_selected ; i++) {
+        if (dates_available[i] == date) {
+          selectDate(i);
+          date_selected = true;
+        }
+      }
+    }
+    if (!date_selected) {
+      selectDate(dates_available.length - 1);
+    }
+    setRoomStyleEnabledness();
+  }
+
+  function selectDate(date_index) {
+    current_date_index = date_index;
+    updateMapImage();
+    setNavigationEnabledness();
+    updateHash();
+  }
+
+  function updateHash() {
+    window.location.hash = dates_available[current_date_index] + "&" +
+                           current_room_style;
+  }
+
+  function earlier() {
+    if (current_date_index > 0) {
+      selectDate(current_date_index - 1);
+    }
+  }
+
+  function later() {
+    if (current_date_index < dates_available.length - 1) {
+      selectDate(current_date_index + 1);
+    }
+  }
+
+  function setNavigationEnabledness() {
+    document.getElementById("earlier").disabled = current_date_index <= 0;
+    document.getElementById("later").disabled = current_date_index >= dates_available.length - 1;
+  }
+
+  function setRoomStyleEnabledness() {
+    updateMapImage();
+
+    var room_button = document.getElementById("dollars_per_room");
+    var bedroom_button = document.getElementById("dollars_per_bedroom");
+
+    room_button.disabled = current_room_style == "room";
+    bedroom_button.disabled = current_room_style == "bedroom";
+
+    room_button.style.borderStyle = current_room_style == "bedroom" ? "outset" : "inset";
+    bedroom_button.style.borderStyle = current_room_style == "room" ? "outset" : "inset";
+
+    var room_prices = document.getElementsByClassName("room_prices");
+    for (var i = 0 ; i < room_prices.length ; i++) {
+      room_prices[i].style.display = current_room_style == "bedroom" ? "none" : "block";
+    }
+    var bedroom_prices = document.getElementsByClassName("bedroom_prices");
+    for (var i = 0 ; i < bedroom_prices.length ; i++) {
+      bedroom_prices[i].style.display = current_room_style == "room" ? "none" : "block";
+    }
+
+    updateHash();
+  }
+
+  function set_dollars_per_room() {
+    current_room_style="room";
+    setRoomStyleEnabledness();
+  }
+
+  function set_dollars_per_bedroom() {
+    current_room_style="bedroom";
+    setRoomStyleEnabledness();
+  }
+
+  function updateMapImage() {
+    var image_date = dates_available[current_date_index];
+    var swBound = new google.maps.LatLng(42.255594, -71.18282318115234);
+    var neBound = new google.maps.LatLng(42.43519362413287, -70.9758);
+    var bounds = new google.maps.LatLngBounds(swBound, neBound);
+  // var srcImage = "http://www.jefftk.com/apartment_prices/apts.boston." + current_room_style + "." + image_date + ".png";
+     var srcImage = "apts.txt.room.1000.png";
+   
+    if (overlay != null) {
+      overlay.setMap(null);  // Remove previous overlay.
+    }
+    overlay = new TQOverlay(bounds, srcImage, map);
+
+    var span = document.getElementById("dateshown");
+    while (span.firstChild) {
+      span.removeChild(span.firstChild);
+    }
+    span.appendChild(document.createTextNode(image_date));
+  }
+
+  function TQOverlay(bounds, image, map) {
+    this.bounds_ = bounds;
+    this.image_ = image;
+    this.map_ = map;
+    this.div_ = null;
+    this.setMap(map);
+  }
+
+  TQOverlay.prototype.onAdd = function() {
+
+    var div = document.createElement('DIV');
+    div.style.border = "none";
+    div.style.borderWidth = "0px";
+    div.style.position = "absolute";
+
+    var img = document.createElement("img");
+    img.src = this.image_;
+    img.style.width = "100%";
+    img.style.height = "100%";
+
+    img.style.opacity = .5;
+    img.style.filter = 'alpha(opacity=50)';
+
+    div.appendChild(img);
+    this.div_ = div;
+    var panes = this.getPanes();
+    panes.overlayLayer.appendChild(div);
+  }
+
+  TQOverlay.prototype.draw = function() {
+    var overlayProjection = this.getProjection();
+
+    var sw = overlayProjection.fromLatLngToDivPixel(this.bounds_.getSouthWest());
+    var ne = overlayProjection.fromLatLngToDivPixel(this.bounds_.getNorthEast());
+
+    var div = this.div_;
+    div.style.left = sw.x + 'px';
+    div.style.top = ne.y + 'px';
+    div.style.width = (ne.x - sw.x) + 'px';
+    div.style.height = (sw.y - ne.y) + 'px';
+  }
+
+  TQOverlay.prototype.onRemove = function() {
+    this.div_.parentNode.removeChild(this.div_);
+    this.div_ = null;
+  }
+
+
+</script>
+</head>
+<body onload="initialize()">
+  <div id="map_canvas" style="width:100%; height:100%"></div>
+  <div id="legend">
+  <table>
+    <tr><th colspan="2">
+    <button id=dollars_per_room style="border-style: inset" onclick="set_dollars_per_room()">$/room</button>
+    <button id=dollars_per_bedroom style="border-style: outset" onclick="set_dollars_per_bedroom()">$/bedroom</button>
+    </th>
+    <tr><td valign=top>
+      <div class="room_prices">
+  <font color="#FF0000">&#9608;</font> $1600+<br>
+  <font color="#FF2B00">&#9608;</font> $1500+<br>
+  <font color="#FF5600">&#9608;</font> $1400+<br>
+  <font color="#FF7F00">&#9608;</font> $1300+<br>
+  <font color="#FFAB00">&#9608;</font> $1200+<br>
+  <font color="#FFD500">&#9608;</font> $1100+<br>
+  <font color="#FFFF00">&#9608;</font> $1000+<br>
+  <font color="#7FFF00">&#9608;</font> $900+<br>
+  <font color="#00FF00">&#9608;</font> $800+<br>
+      </div>
+      <div class="bedroom_prices" style="display: none">
+  <font color="#FF0000">&#9608;</font> $1800+<br>
+  <font color="#FF2B00">&#9608;</font> $1700+<br>
+  <font color="#FF5600">&#9608;</font> $1600+<br>
+  <font color="#FF7F00">&#9608;</font> $1500+<br>
+  <font color="#FFAB00">&#9608;</font> $1400+<br>
+  <font color="#FFD500">&#9608;</font> $1300+<br>
+  <font color="#FFFF00">&#9608;</font> $1200+<br>
+  <font color="#7FFF00">&#9608;</font> $1100+<br>
+  <font color="#00FF00">&#9608;</font> $1000+<br>
+      </div>
+    <td valign=top>
+      <div class="room_prices">
+  <font color="#00FF7F">&#9608;</font> $700+<br>
+  <font color="#00FFFF">&#9608;</font> $600+<br>
+  <font color="#00D5FF">&#9608;</font> $500+<br>
+  <font color="#00ABFF">&#9608;</font> $400+<br>
+  <font color="#007FFF">&#9608;</font> $300+<br>
+  <font color="#0056FF">&#9608;</font> $250+<br>
+  <font color="#002BFF">&#9608;</font> $200+<br>
+  <font color="#0000FF">&#9608;</font> $200-<br>
+      </div>
+      <div class="bedroom_prices" style="display: none">
+  <font color="#00FF7F">&#9608;</font> $900+<br>
+  <font color="#00FFFF">&#9608;</font> $800+<br>
+  <font color="#00D5FF">&#9608;</font> $700+<br>
+  <font color="#00ABFF">&#9608;</font> $600+<br>
+  <font color="#007FFF">&#9608;</font> $500+<br>
+  <font color="#0056FF">&#9608;</font> $400+<br>
+  <font color="#002BFF">&#9608;</font> $300+<br>
+  <font color="#0000FF">&#9608;</font> $300-<br>
+      </div>
+  <tr><td colspan=2>
+    <button id=earlier onclick="earlier()">&lt;</button>
+    <span id=dateshown></span>
+    <button id=later onclick="later()">&gt;</button>
+  <tr><td><a href="http://www.jefftk.com/">main site</a>
+      <td align=right><a href="details">details</a>
+    
+    </table>
+  </div>
+</body> </html>
